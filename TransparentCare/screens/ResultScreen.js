@@ -1,35 +1,59 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useImage } from '../context/ImageContext';
 
-export default function ResultScreen({ receiptImage }) {
-  const [receiptText, setReceiptText] = useState('');
+export default function ResultScreen() {
+  const { base64Image } = useImage();
+  const [loading, setLoading] = useState(true);
+  const [textResult, setTextResult] = useState('');
+
+  const fetchTextResult = async () => {
+    if (!base64Image) {
+      setLoading(false);
+      setTextResult('No image provided.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('https://abc123.ngrok.io/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64Image }),
+      });
+      const data = await response.json();
+      if (data.text) {
+        setTextResult(data.text);
+      } else {
+        setTextResult('No text extracted from the image.');
+      }
+    } catch (error) {
+      console.error('Error fetching text:', error);
+      setTextResult('Failed to extract text.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (receiptImage) {
-      // Simulate OCR processing delay and return dummy text
-      setTimeout(() => {
-        setReceiptText(
-          "Receipt OCR Result:\n\n" +
-          "Store: Sample Pharmacy\n" +
-          "Date: 03/21/2025\n" +
-          "Items:\n" +
-          " - Aspirin: $5.00\n" +
-          " - Ibuprofen: $8.50\n" +
-          " - Consultation Fee: $50.00\n" +
-          "Total: $63.50\n"
-        );
-      }, 500);
-    }
-  }, [receiptImage]);
+    fetchTextResult();
+  }, [base64Image]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Receipt Details</Text>
-        {receiptText ? (
-          <Text style={styles.ocrText}>{receiptText}</Text>
+        <Text style={styles.title}>Receipt Analysis</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#4CBE6C" />
         ) : (
-          <Text style={styles.message}>No receipt processed yet.</Text>
+          <>
+            <Text style={styles.resultText}>
+              {textResult || (base64Image ? base64Image.substring(0, 100) : 'No image data.')}
+            </Text>
+            <TouchableOpacity onPress={fetchTextResult} style={styles.retryButton}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -37,27 +61,46 @@ export default function ResultScreen({ receiptImage }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { 
-    flex: 1 
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F9F9F9',
   },
   container: {
-    padding: 20,
+    paddingTop: 100,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    paddingTop: 100, // extra top padding for iPhone notch and to push content lower
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
+    color: '#333',
+    marginBottom: 30,
   },
-  ocrText: {
-    fontSize: 16,
-    textAlign: 'left',
-    width: '100%',
-  },
-  message: {
-    fontSize: 16,
+  resultText: {
+    fontSize: 18,
+    lineHeight: 24,
     textAlign: 'center',
-    marginTop: 20,
+    color: '#555',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    // Adding a subtle shadow for depth
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  retryButton: {
+    backgroundColor: '#4CBE6C',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 30,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
