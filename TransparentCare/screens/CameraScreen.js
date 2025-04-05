@@ -28,6 +28,8 @@ export default function CameraScreen({ navigation }) {
             });
         console.log("Base64 string (first 100 chars):", base64.substring(0, 100));
         setBase64Image(base64);
+        console.log("Base64 length:", base64.length);
+        console.log("Base64 preview:", base64.substring(0, 100));
       } catch (error) {
         console.error("Error taking picture:", error);
       }
