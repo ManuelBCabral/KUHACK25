@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   topSpacer: {
-    height: 30,
+    height: 80,
   },
   title: {
     fontSize: 24,
