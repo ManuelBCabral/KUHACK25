@@ -1,20 +1,22 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "body-parser": "^2.2.0",
+    "body-parser": "^1.20.3",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
+    "expo-file-system": "~18.0.12",
+    "express": "^4.21.2",
     "google-auth-library": "^9.15.1",
     "node-fetch": "^2.7.0",
-    "expo-file-system": "~18.0.12"
+    "node-tesseract-ocr": "^2.2.1"
   }
 }

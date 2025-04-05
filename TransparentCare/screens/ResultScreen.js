@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { useImage } from '../context/ImageContext';
+
+// Try the HTTP version from ngrok if HTTPS fails
+const NGROK_URL = 'https://242e-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
 
 export default function ResultScreen() {
   const { base64Image } = useImage();
@@ -8,7 +11,9 @@ export default function ResultScreen() {
   const [textResult, setTextResult] = useState('');
 
   const fetchTextResult = async () => {
+    console.log("Starting fetchTextResult");
     if (!base64Image) {
+      console.log("No base64Image provided");
       setLoading(false);
       setTextResult('No image provided.');
       return;
@@ -16,12 +21,18 @@ export default function ResultScreen() {
 
     setLoading(true);
     try {
-      const response = await fetch('https://abc123.ngrok.io/analyze', {
+      console.log(`Sending fetch request to backend at: ${NGROK_URL}/analyze`);
+      
+      const response = await fetch(`${NGROK_URL}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64Image }),
+        body: JSON.stringify({ base64Image })
       });
+
+      console.log("Fetch response received with status:", response.status);
       const data = await response.json();
+      console.log("Data received from backend:", data);
+
       if (data.text) {
         setTextResult(data.text);
       } else {
@@ -32,75 +43,51 @@ export default function ResultScreen() {
       setTextResult('Failed to extract text.');
     } finally {
       setLoading(false);
+      console.log("Fetch finished, loading set to false");
     }
   };
 
   useEffect(() => {
+    console.log("useEffect triggered with base64Image:", base64Image 
+      ? base64Image.substring(0, 30) 
+      : 'null'
+    );
     fetchTextResult();
   }, [base64Image]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Receipt Analysis</Text>
         {loading ? (
           <ActivityIndicator size="large" color="#4CBE6C" />
         ) : (
           <>
-            <Text style={styles.resultText}>
-              {textResult || (base64Image ? base64Image.substring(0, 100) : 'No image data.')}
-            </Text>
+            <Text style={styles.resultText}>{textResult}</Text>
             <TouchableOpacity onPress={fetchTextResult} style={styles.retryButton}>
               <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  container: {
-    paddingTop: 100,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 30,
-  },
-  resultText: {
-    fontSize: 18,
-    lineHeight: 24,
-    textAlign: 'center',
-    color: '#555',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    // Adding a subtle shadow for depth
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+  container: { flex: 1, paddingTop: 100, paddingHorizontal: 20 },
+  scrollContainer: { alignItems: 'center', paddingBottom: 40 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  resultText: { fontSize: 18, lineHeight: 24, textAlign: 'center' },
   retryButton: {
-    backgroundColor: '#4CBE6C',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 30,
+    marginTop: 20,
+    backgroundColor: '#00000088',
+    padding: 12,
+    borderRadius: 8
   },
   retryButtonText: {
     color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+    fontSize: 16,
+    fontWeight: 'bold'
+  }
 });
