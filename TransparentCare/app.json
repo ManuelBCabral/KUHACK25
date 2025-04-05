@@ -27,8 +27,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow MedLens to access your camera",
-          "microphonePermission": "Allow MedLens to access your microphone",
+          "cameraPermission": "Allow TransparentCare to access your camera",
+          "microphonePermission": "Allow TransparentCare to access your microphone",
           "recordAudioAndroid": true
         }
       ]
