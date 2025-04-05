@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity
 import { useImage } from '../context/ImageContext';
 
 // Try the HTTP version from ngrok if HTTPS fails
-const NGROK_URL = 'https://242e-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
+const NGROK_URL = 'https://e87d-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
 
 export default function ResultScreen() {
   const { base64Image } = useImage();

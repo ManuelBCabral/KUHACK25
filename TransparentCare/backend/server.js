@@ -1,4 +1,5 @@
 // server.js
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -21,39 +22,45 @@ app.post('/analyze', async (req, res) => {
       return res.status(400).json({ error: 'No base64Image provided' });
     }
 
-    // 1) Strip any "data:image/..." prefix
+    // Remove any data prefix, e.g. "data:image/jpeg;base64,"
     const cleanedBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
 
-    // 2) Convert base64 -> Buffer
+    // Convert base64 -> Buffer
     const imgBuffer = Buffer.from(cleanedBase64, 'base64');
 
-    // 3) Preprocess with Sharp: grayscale + threshold
+    // Preprocessing with Sharp:
+    // 1) Resize up to 2000 px wide for better OCR if the original is small.
+    // 2) (Optionally) rotate if you suspect the receipt is tilted.
+    // 3) Convert to grayscale & threshold to boost contrast.
     const processedBuffer = await sharp(imgBuffer)
-      .greyscale()     
+      // .rotate(2)           // Uncomment & change angle if the receipt is tilted by ~2 degrees
+      .resize({ width: 2000, withoutEnlargement: false })
+      .greyscale()
       .threshold(128)
-      // .rotate()      // If the receipt is tilted, you can rotate by a fixed angle
-      // .resize(...)   // Optionally resize if the original is huge
       .toBuffer();
 
-    // 4) Save the processed image as a temporary file for Tesseract
+    // Write processed image to temp file
     const tempFilePath = path.join(__dirname, 'temp_processed.jpg');
     fs.writeFileSync(tempFilePath, processedBuffer);
 
-    // 5) Tesseract config
+    // Tesseract configuration:
+    // OEM=3 means "use any available engine" (legacy + LSTM if installed).
+    // PSM=3 is "Fully automatic page segmentation" which can be good for multi-line text.
+    // Try PSM=6 or 7 if text is single-column or single-line.
     const config = {
-      lang: 'eng', 
-      oem: 1,       // LSTM engine only
-      psm: 6        // Assume a single uniform block of text (often good for receipts)
+      lang: 'eng',  // for English; install additional languages if needed
+      oem: 3,       // 3 = default, tries legacy + LSTM
+      psm: 3        // 3 = fully automatic, or try 6 = uniform block, 7 = single text line
     };
 
-    // 6) OCR with Tesseract
+    // OCR with Tesseract
     const text = await tesseract.recognize(tempFilePath, config);
     console.log('[Tesseract OCR] Extracted text:\n', text);
 
-    // (Optional) Clean up the temp file
+    // Remove the temp file
     fs.unlinkSync(tempFilePath);
 
-    // 7) Return recognized text
+    // Return recognized text
     res.json({ text: text.trim() });
 
   } catch (error) {
