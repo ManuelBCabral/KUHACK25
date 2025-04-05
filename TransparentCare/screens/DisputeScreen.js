@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, Alert } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 
 export default function DisputeScreen() {
   const [disputeLetter, setDisputeLetter] = useState('');
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   // Example medical charges data with CPT, NDC, quantity and amount
   const exampleCharges = [
@@ -48,8 +50,6 @@ export default function DisputeScreen() {
   const generateDisputeLetter = async () => {
     setLoading(true);
     
-    // In a real implementation, this would call the Gemini API
-    // For now, we'll simulate the response with template data
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -76,9 +76,32 @@ export default function DisputeScreen() {
     }
   };
 
+  const downloadDisputeLetter = async () => {
+    if (!disputeLetter) return;
+    
+    setDownloading(true);
+    try {
+      const fileName = `Medical_Dispute_Letter_${new Date().toISOString().split('T')[0]}.txt`;
+      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+      
+      await FileSystem.writeAsStringAsync(fileUri, disputeLetter);
+      Alert.alert(
+        'Letter Saved',
+        `Dispute letter has been saved to your device as ${fileName}`,
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error saving letter:', error);
+      Alert.alert('Error', 'Failed to save dispute letter');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.topSpacer} />
         <Text style={styles.title}>Dispute Charges</Text>
         
         <View style={styles.chargesContainer}>
@@ -111,7 +134,21 @@ export default function DisputeScreen() {
         {disputeLetter ? (
           <View style={styles.letterContainer}>
             <Text style={styles.letterTitle}>Generated Dispute Letter</Text>
-            <Text style={styles.letterText}>{disputeLetter}</Text>
+            <ScrollView style={styles.letterScrollView}>
+              <Text style={styles.letterText}>{disputeLetter}</Text>
+            </ScrollView>
+            
+            <TouchableOpacity 
+              onPress={downloadDisputeLetter} 
+              style={styles.downloadButton}
+              disabled={downloading}
+            >
+              {downloading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text style={styles.downloadButtonText}>Save Letter to Device</Text>
+              )}
+            </TouchableOpacity>
           </View>
         ) : null}
       </ScrollView>
@@ -128,11 +165,14 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
+  topSpacer: {
+    height: 30,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 20,
+    marginBottom: 25,
     textAlign: 'center',
   },
   chargesContainer: {
@@ -205,9 +245,24 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
   },
+  letterScrollView: {
+    maxHeight: 200,
+    marginBottom: 15,
+  },
   letterText: {
     fontSize: 14,
     color: '#444',
     lineHeight: 20,
+  },
+  downloadButton: {
+    backgroundColor: '#2a5885',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  downloadButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

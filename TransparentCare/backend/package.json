@@ -12,9 +12,10 @@
   "dependencies": {
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "expo-file-system": "~18.0.12",
+    "expo-sharing": "^13.0.1",
     "express": "^5.1.0",
     "google-auth-library": "^9.15.1",
-    "node-fetch": "^2.7.0",
-    "expo-file-system": "~18.0.12"
+    "node-fetch": "^2.7.0"
   }
 }
