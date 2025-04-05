@@ -1,20 +1,22 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import PagerView from 'react-native-pager-view';
+import CameraScreen from './screens/CameraScreen';
+import UploadScreen from './screens/UploadScreen';
+import ResultScreen from './screens/ResultScreen';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <PagerView style={styles.pagerView} initialPage={1} orientation="horizontal">
+      <View key="1"><UploadScreen /></View>
+      <View key="2"><CameraScreen /></View>
+      <View key="3"><ResultScreen /></View>
+    </PagerView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  pagerView: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
