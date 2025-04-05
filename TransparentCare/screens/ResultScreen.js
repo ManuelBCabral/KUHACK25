@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerSpacer: {
-    height: 40,
+    height: 80,
   },
   title: {
     fontSize: 24,
