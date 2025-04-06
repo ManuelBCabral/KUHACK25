@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { 
+  SafeAreaView, 
+  ScrollView, 
+  StyleSheet, 
+  Text, 
+  TouchableOpacity, 
+  View, 
+  ActivityIndicator 
+} from 'react-native';
 import OpenAI from 'openai';
 
-export default function ResultScreen() {
+export default function ResultScreen({ onProcessComplete }) {
   const [expandedItems, setExpandedItems] = useState([]);
   const [medicalBill, setMedicalBill] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -28,12 +36,23 @@ export default function ResultScreen() {
     processMedicalBill();
   }, []);
 
+  const generateCptData = (billData) => {
+    if (!billData?.charges) return [];
+    return billData.charges.map(item => {
+      const cptMatch = item.name.match(/\(CPT (\w+)\)/);
+      return {
+        cpt: cptMatch ? cptMatch[1] : 'N/A',
+        quantity: 1, // Default to 1 if not specified
+        amount: item.amount.replace('$', '')
+      };
+    });
+  };
+
   const processMedicalBill = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // Initialize OpenAI (in production, use a proper API key management system)
       const openai = new OpenAI({
         apiKey: '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', // Replace with your actual API key
         dangerouslyAllowBrowser: true // Only for testing in development
@@ -72,9 +91,9 @@ export default function ResultScreen() {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo", // or "gpt-4" if you have access
+        model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.3, // Lower temperature for more consistent results
+        temperature: 0.3,
       });
 
       const content = response.choices[0]?.message?.content;
@@ -82,6 +101,11 @@ export default function ResultScreen() {
         try {
           const parsedData = JSON.parse(content);
           setMedicalBill(parsedData);
+          
+          // Generate CPT data and notify parent component
+          const cptData = generateCptData(parsedData);
+          onProcessComplete(parsedData, cptData);
+          
         } catch (parseError) {
           console.error("Error parsing GPT response:", parseError);
           setError("Failed to parse the medical bill data.");
