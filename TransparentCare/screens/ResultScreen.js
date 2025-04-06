@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { useImage } from '../context/ImageContext';
 
-// Try the HTTP version from ngrok if HTTPS fails
-const NGROK_URL = 'https://e87d-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
+// Use your active ngrok URL here
+const NGROK_URL = 'https://b0cb-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
 
 export default function ResultScreen() {
   const { base64Image } = useImage();
   const [loading, setLoading] = useState(true);
   const [textResult, setTextResult] = useState('');
+
+  // This is your hardcodedBillText variable
+  let hardcodedBillText = '';
 
   const fetchTextResult = async () => {
     console.log("Starting fetchTextResult");
@@ -34,7 +37,9 @@ export default function ResultScreen() {
       console.log("Data received from backend:", data);
 
       if (data.text) {
-        setTextResult(data.text);
+        hardcodedBillText = data.text;
+        setTextResult(hardcodedBillText);
+        console.log('✅ hardcodedBillText:', hardcodedBillText);
       } else {
         setTextResult('No text extracted from the image.');
       }
