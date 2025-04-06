@@ -83,8 +83,9 @@ export default function ResultScreen({ onProcessComplete }) {
    - Item ID
    - Item name (include CPT codes)
    - Amount
-   - Description, once you have the description generate a brief summary of why this procedure was used
-   this summary should be in the return json for description
+   - Description (after extracting the description make a brief summary (1-3 sentences) this summary should explain why the procedure was used
+    summary will be in the return json format for description)
+
 5. Subtotal
 
 Return JSON format:
