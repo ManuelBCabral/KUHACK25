@@ -11,7 +11,7 @@ import {
 import { useImage } from '../context/ImageContext';
 import OpenAI from 'openai';
 
-const NGROK_URL = 'https://f6b7-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
+const NGROK_URL = 'https://6d83-2001-49d0-8512-1-8d70-c02f-32cf-2807.ngrok-free.app';
 
 export default function ResultScreen({ onProcessComplete }) {
   const { base64Image } = useImage();
@@ -83,7 +83,8 @@ export default function ResultScreen({ onProcessComplete }) {
    - Item ID
    - Item name (include CPT codes)
    - Amount
-   - Description
+   - Description, once you have the description generate a brief summary of why this procedure was used
+   this summary should be in the return json for description
 5. Subtotal
 
 Return JSON format:
