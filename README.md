@@ -1,64 +1,50 @@
-<<<<<<< HEAD
 # KUHACK25
+Transparent Care
+Empowering Patients Through Clear Medical Billing
 
-	1.	Clone the repository and navigate into the project directory:
-git clone <your-repo-url>
-cd KUHACK25
-	2.	Switch to the correct branch:
-git checkout Eric
-	3.	Open two terminal windows.
-	4.	In the first terminal:
-a. Navigate to the backend folder:
-cd backend
-b. Install dependencies:
-npm install
-c. Start the backend server:
-node index.js
-This will start the server on port 4000.
-	5.	In the second terminal:
-a. Navigate to the frontend folder:
-cd TransparentCare
-b. Install dependencies:
-npm install
-c. Start the mobile app:
-npx expo start --tunnel
-This will open the Expo Developer Tools.
-	6.	Scan the QR code from the Expo Developer Tools using the Expo Go app on your phone to run the application.
-	7.	Ensure you have Node.js and npm installed on your machine before beginning these steps.
-=======
-## How to Run the Project Locally
+Transparent Care is an innovative mobile app that helps you decode, understand, and dispute confusing medical bills. Simply take a picture of your itemized receipt, and our AI will break down each charge, explain procedures in plain language, and even generate a dispute letter if errors are detected.
 
-1. **Clone the repository and navigate into the project directory**  
-   ```bash
-   git clone <your-repo-url>
-   cd KUHACK25
+✨ Key Features
+📸 Snap & Scan – Take a photo of your medical bill, and our app extracts all itemized charges with OCR technology.
 
-	2.	Switch to the correct branch
+🤖 AI-Powered Explanations – Gemini AI analyzes each procedure code and provides easy-to-understand descriptions, so you know exactly what you were billed for.
 
-git checkout Eric
+📝 Auto-Generated Dispute Letters – Overcharged? With one tap, generate a customized dispute letter to send to your provider or insurer.
 
+💡 Cost & Procedure Insights – Learn about typical pricing for medical services and avoid overcharges.
 
-	3.	Open two terminal windows
-	4.	In Terminal 1: Start the Backend Server
+🔒 Your Data, Your Control – We prioritize privacy—your medical info is processed securely and never stored unnecessarily.
 
-cd backend
-npm install
-node index.js
+🎮 Swipe-Right Tutorial – New to the app? Swipe right when you open it for a quick, interactive walkthrough!
 
-This will start the backend server on port 4000.
+📲 How It Works
+📸 Capture – Take a picture of your itemized medical bill.
 
-	5.	In Terminal 2: Start the Mobile App (Frontend)
+🔍 Extract – Our app converts the image into structured text.
 
-cd TransparentCare
-npm install
-npx expo start --tunnel
+📖 Understand – Get plain-English explanations for every charge.
 
-This will launch the Expo Developer Tools in your browser.
+⚖️ Dispute (If Needed) – Generate a ready-to-send dispute letter in seconds.
 
-	6.	Scan the QR Code
-Use the Expo Go app on your phone to scan the QR code from the Expo Developer Tools and launch the app.
-	7.	Requirements
-	•	Node.js and npm installed on your machine
-	•	Expo Go app installed on your iOS or Android device
+🚀 Why Use Transparent Care?
+✅ No More Confusing Bills – Understand every line item.
+✅ Fight Overcharges – Dispute errors with AI-generated letters.
+✅ Avoid Surprise Fees – Learn fair pricing for common procedures.
+✅ Quick & Easy Onboarding – Swipe right for instant app instructions.
 
->>>>>>> 45d9b1a4820fd1cc9f58ec482eb255695c916bbd
+🛠️ For Developers & Contributors
+Built with:
+
+Gemini AI (Medical text analysis)
+
+React Native (Cross-platform app)
+
+Developers Linkedin profiles
+
+Manuel - https://www.linkedin.com/in/manuel-sur-474308290/ 
+
+Eric - https://www.linkedin.com/in/eric-chin01/
+
+Johnathon - https://www.linkedin.com/in/johnathon-brumfield-16a5a5248/
+
+💙 Transparent Care – Because You Deserve to Understand (and Dispute) Your Medical Bills.
