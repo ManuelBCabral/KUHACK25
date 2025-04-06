@@ -8,33 +8,48 @@ import {
   View, 
   ActivityIndicator 
 } from 'react-native';
+import { useImage } from '../context/ImageContext';
 import OpenAI from 'openai';
 
+const NGROK_URL = 'https://b0cb-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
+
 export default function ResultScreen({ onProcessComplete }) {
+  const { base64Image } = useImage();
   const [expandedItems, setExpandedItems] = useState([]);
   const [medicalBill, setMedicalBill] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [textResult, setTextResult] = useState('');
 
-  // Hardcoded medical bill text input
-  const hardcodedBillText = `
-  PATIENT: JANE SMITH
-  DATE OF SERVICE: 05/15/2023
-  PROVIDER: CITY GENERAL HOSPITAL
-  
-  SERVICES RENDERED:
-  1. ER Visit - Level 3 (CPT 99283) - $1,250.00
-  2. CT Head Without Contrast (CPT 70450) - $850.00
-  3. CBC Blood Test - $120.00
-  4. Metabolic Panel - $200.00
-  5. Physician Consultation - $475.00
-  
-  SUBTOTAL: $2,895.00
-  `;
+  const fetchTextResult = async () => {
+    if (!base64Image) {
+      setLoading(false);
+      setTextResult('No image provided.');
+      return;
+    }
 
-  useEffect(() => {
-    processMedicalBill();
-  }, []);
+    setLoading(true);
+    try {
+      const response = await fetch(`${NGROK_URL}/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64Image })
+      });
+
+      const data = await response.json();
+      if (data.text) {
+        setTextResult(data.text);
+        processMedicalBill(data.text); // Process the extracted text with GPT
+      } else {
+        setTextResult('No text extracted from the image.');
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error fetching text:', error);
+      setError('Failed to extract text.');
+      setLoading(false);
+    }
+  };
 
   const generateCptData = (billData) => {
     if (!billData?.charges) return [];
@@ -42,52 +57,53 @@ export default function ResultScreen({ onProcessComplete }) {
       const cptMatch = item.name.match(/\(CPT (\w+)\)/);
       return {
         cpt: cptMatch ? cptMatch[1] : 'N/A',
-        quantity: 1, // Default to 1 if not specified
+        quantity: 1,
         amount: item.amount.replace('$', '')
       };
     });
   };
 
-  const processMedicalBill = async () => {
+  const processMedicalBill = async (billText) => {
+    if (!billText) return;
+    
     setLoading(true);
     setError(null);
     
     try {
       const openai = new OpenAI({
-        apiKey: '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', // Replace with your actual API key
-        dangerouslyAllowBrowser: true // Only for testing in development
+        apiKey: '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', // Move this to backend
+        dangerouslyAllowBrowser: true // Only for development
       });
 
-      const prompt = `
-      Analyze this medical bill text and extract the following information:
+      const prompt = `Analyze this medical bill text and extract:
       1. Patient name
       2. Date of service
       3. Provider name
-      4. List of charges including:
-         - Item ID (generate sequential if not present)
-         - Item name (include CPT/NDC codes if available)
-         - Amount charged
-         - Description of the service (generate a clear explanation and explain briefly what the service is)
-      5. Subtotal amount
+      4. List of charges with:
+         - Item ID
+         - Item name (include CPT codes)
+         - Amount
+         - Description
+      5. Subtotal
 
-      Return the information in JSON format with this structure:
+      Return JSON format:
       {
-        "patient": "Patient Name",
+        "patient": "Name",
         "date": "Date",
-        "provider": "Provider Name",
+        "provider": "Provider",
         "charges": [
           {
             "id": 1,
-            "name": "Item Name",
+            "name": "Item (CPT 12345)",
             "amount": "$100.00",
-            "description": "Description of the service"
+            "description": "Service description"
           }
         ],
         "subtotal": "$100.00"
       }
 
-      Here is the medical bill text to analyze:
-      ${hardcodedBillText}
+      Bill text:
+      ${billText}
       `;
 
       const response = await openai.chat.completions.create({
@@ -98,22 +114,14 @@ export default function ResultScreen({ onProcessComplete }) {
 
       const content = response.choices[0]?.message?.content;
       if (content) {
-        try {
-          const parsedData = JSON.parse(content);
-          setMedicalBill(parsedData);
-          
-          // Generate CPT data and notify parent component
-          const cptData = generateCptData(parsedData);
-          onProcessComplete(parsedData, cptData);
-          
-        } catch (parseError) {
-          console.error("Error parsing GPT response:", parseError);
-          setError("Failed to parse the medical bill data.");
-        }
+        const parsedData = JSON.parse(content);
+        setMedicalBill(parsedData);
+        const cptData = generateCptData(parsedData);
+        onProcessComplete?.(parsedData, cptData);
       }
     } catch (err) {
-      console.error("Error processing medical bill:", err);
-      setError("Failed to process the medical bill. Please check your API key and try again.");
+      console.error("Error processing bill:", err);
+      setError("Failed to process medical bill.");
     } finally {
       setLoading(false);
     }
@@ -125,12 +133,18 @@ export default function ResultScreen({ onProcessComplete }) {
     );
   };
 
+  useEffect(() => {
+    fetchTextResult();
+  }, [base64Image]);
+
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#2a5885" />
-          <Text style={styles.loadingText}>Processing medical bill...</Text>
+          <Text style={styles.loadingText}>
+            {medicalBill ? 'Processing medical bill...' : 'Extracting text...'}
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -143,7 +157,7 @@ export default function ResultScreen({ onProcessComplete }) {
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity 
             style={styles.retryButton}
-            onPress={processMedicalBill}
+            onPress={fetchTextResult}
           >
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
@@ -156,7 +170,9 @@ export default function ResultScreen({ onProcessComplete }) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No medical bill data available</Text>
+          <Text style={styles.emptyText}>
+            {textResult || 'No medical bill data available'}
+          </Text>
         </View>
       </SafeAreaView>
     );
