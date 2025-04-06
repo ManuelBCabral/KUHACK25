@@ -22,7 +22,7 @@
     "node-fetch": "^2.7.0",
     "node-tesseract-ocr": "^2.2.1",
     "sharp": "^0.34.0",
-    "@react-native-async-storage/async-storage": "1.23.1"
+    "@react-native-async-storage/async-storage": "1.23.1",
     "openai": "^4.91.1"
   }
 }

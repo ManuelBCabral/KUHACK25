@@ -52,7 +52,7 @@ app.post('/analyze', async (req, res) => {
     console.log('[📄 Stored in hardcodedBillText]:\n', hardcodedBillText);
 
     // Respond with generic "ok"
-    res.json({ status: 'ok' });
+    res.json({ text: extractedText });
 
   } catch (err) {
     console.error('[❌ GPT-4 Vision Error]', err?.status || '', err?.message || err);

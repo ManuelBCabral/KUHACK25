@@ -11,7 +11,7 @@ import {
 import { useImage } from '../context/ImageContext';
 import OpenAI from 'openai';
 
-const NGROK_URL = 'https://b0cb-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
+const NGROK_URL = 'https://f6b7-2001-49d0-8512-1-a95f-a617-5327-d4f.ngrok-free.app';
 
 export default function ResultScreen({ onProcessComplete }) {
   const { base64Image } = useImage();
@@ -71,40 +71,40 @@ export default function ResultScreen({ onProcessComplete }) {
     
     try {
       const openai = new OpenAI({
-        apiKey: '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', // Move this to backend
-        dangerouslyAllowBrowser: true // Only for development
+        apiKey: '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', // Move to backend
+        dangerouslyAllowBrowser: true
       });
 
       const prompt = `Analyze this medical bill text and extract:
-      1. Patient name
-      2. Date of service
-      3. Provider name
-      4. List of charges with:
-         - Item ID
-         - Item name (include CPT codes)
-         - Amount
-         - Description
-      5. Subtotal
+1. Patient name
+2. Date of service
+3. Provider name
+4. List of charges with:
+   - Item ID
+   - Item name (include CPT codes)
+   - Amount
+   - Description
+5. Subtotal
 
-      Return JSON format:
-      {
-        "patient": "Name",
-        "date": "Date",
-        "provider": "Provider",
-        "charges": [
-          {
-            "id": 1,
-            "name": "Item (CPT 12345)",
-            "amount": "$100.00",
-            "description": "Service description"
-          }
-        ],
-        "subtotal": "$100.00"
-      }
+Return JSON format:
+{
+  "patient": "Name",
+  "date": "Date",
+  "provider": "Provider",
+  "charges": [
+    {
+      "id": 1,
+      "name": "Item (CPT 12345)",
+      "amount": "$100.00",
+      "description": "Service description"
+    }
+  ],
+  "subtotal": "$100.00"
+}
 
-      Bill text:
-      ${billText}
-      `;
+Bill text:
+${billText}
+`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -169,15 +169,18 @@ export default function ResultScreen({ onProcessComplete }) {
   if (!medicalBill) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            {textResult || 'No medical bill data available'}
-          </Text>
-        </View>
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.headerSpacer} />
+          <Text style={styles.title}>Extracted Bill Text</Text>
+          <View style={styles.billHeader}>
+            <Text style={styles.chargeDescription}>
+              {textResult || 'No medical bill data available'}
+            </Text>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -203,7 +206,9 @@ export default function ResultScreen({ onProcessComplete }) {
             
             {expandedItems.includes(item.id) && (
               <View style={styles.chargeDetails}>
-                <Text style={styles.chargeDescription}>{item.description}</Text>
+                <Text style={styles.chargeDescription}>
+      {item.description?.trim() || 'No description available.'}
+    </Text>
               </View>
             )}
           </View>
