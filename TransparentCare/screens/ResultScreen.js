@@ -71,7 +71,7 @@ export default function ResultScreen({ onProcessComplete }) {
     
     try {
       const openai = new OpenAI({
-        apiKey: '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', // Move to backend
+        apiKey: '', // Move to put api key
         dangerouslyAllowBrowser: true
       });
 
